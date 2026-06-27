@@ -170,14 +170,11 @@
 
             <separator/>
 
-            <reference ref="Titanium.Clean"/>
+            <action id="Titanium.Clean"
+                    class="com.tidev.titanium.actions.TiCleanAction"
+                    icon="AllIcons.Actions.GC"
+                    text="Clean Titanium Project"/>
         </group>
-
-        <!-- Defined once here; referenced above and surfaced via the explorer too. -->
-        <action id="Titanium.Clean"
-                class="com.tidev.titanium.actions.TiCleanAction"
-                icon="AllIcons.Actions.GC"
-                text="Clean Titanium Project"/>
 
         <!-- Also offer the Alloy generators from the project-view right-click menu. -->
         <group id="Titanium.Alloy.Generate.ProjectView" text="Generate Alloy" popup="true" icon="/icons/titanium.svg">

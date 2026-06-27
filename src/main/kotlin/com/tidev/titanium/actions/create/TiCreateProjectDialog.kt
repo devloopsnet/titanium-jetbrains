@@ -40,10 +40,10 @@ class TiCreateProjectDialog(
         title = if (type == TiProjectType.APP) "New Titanium App" else "New Titanium Module"
         idField.emptyText.text = "com.example.app"
         locationField.addBrowseFolderListener(
-            "Select Location",
-            "Choose where the project will be created",
             project,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor(),
+            FileChooserDescriptorFactory.createSingleFolderDescriptor()
+                .withTitle("Select Location")
+                .withDescription("Choose where the project will be created"),
         )
         init()
     }
