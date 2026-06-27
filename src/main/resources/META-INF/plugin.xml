@@ -48,6 +48,8 @@
                   extensions="tss"
                   fieldName="INSTANCE"
                   implementationClass="com.tidev.titanium.tss.TssFileType"/>
+        <lang.syntaxHighlighterFactory language="TSS"
+                  implementationClass="com.tidev.titanium.tss.TssSyntaxHighlighterFactory"/>
 
         <!-- Alloy XML view completion. Universal (XML support is everywhere). -->
         <completion.contributor language="XML"
@@ -61,11 +63,62 @@
 
     <actions>
         <!-- Tool-window toolbar actions are built inline in TiExplorerPanel.
-             Menu-level actions are registered here. -->
+             Menu-level actions live in the Titanium group under Tools. -->
+        <group id="Titanium.MainGroup" text="Titanium" popup="true" icon="/icons/titanium.svg">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+
+            <action id="Titanium.CreateApp"
+                    class="com.tidev.titanium.actions.create.TiCreateAppAction"
+                    text="New Titanium App…"
+                    description="Scaffold a Titanium app with `ti create`"/>
+            <action id="Titanium.CreateModule"
+                    class="com.tidev.titanium.actions.create.TiCreateModuleAction"
+                    text="New Titanium Module…"
+                    description="Scaffold a native Titanium module with `ti create`"/>
+
+            <separator/>
+
+            <group id="Titanium.Alloy.Generate" text="Generate Alloy" popup="true">
+                <action id="Titanium.Alloy.Controller"
+                        class="com.tidev.titanium.actions.alloy.AlloyGenerateControllerAction"
+                        text="Controller…"/>
+                <action id="Titanium.Alloy.View"
+                        class="com.tidev.titanium.actions.alloy.AlloyGenerateViewAction"
+                        text="View…"/>
+                <action id="Titanium.Alloy.Style"
+                        class="com.tidev.titanium.actions.alloy.AlloyGenerateStyleAction"
+                        text="Style…"/>
+                <action id="Titanium.Alloy.Model"
+                        class="com.tidev.titanium.actions.alloy.AlloyGenerateModelAction"
+                        text="Model…"/>
+                <action id="Titanium.Alloy.Migration"
+                        class="com.tidev.titanium.actions.alloy.AlloyGenerateMigrationAction"
+                        text="Migration…"/>
+                <action id="Titanium.Alloy.Widget"
+                        class="com.tidev.titanium.actions.alloy.AlloyGenerateWidgetAction"
+                        text="Widget…"/>
+            </group>
+
+            <separator/>
+
+            <reference ref="Titanium.Clean"/>
+        </group>
+
+        <!-- Defined once here; referenced above and surfaced via the explorer too. -->
         <action id="Titanium.Clean"
                 class="com.tidev.titanium.actions.TiCleanAction"
-                icon="AllIcons.Actions.GC">
-            <add-to-group group-id="ToolsMenu" anchor="last"/>
-        </action>
+                icon="AllIcons.Actions.GC"
+                text="Clean Titanium Project"/>
+
+        <!-- Also offer the Alloy generators from the project-view right-click menu. -->
+        <group id="Titanium.Alloy.Generate.ProjectView" text="Generate Alloy" popup="true" icon="/icons/titanium.svg">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="after" relative-to-action="NewGroup"/>
+            <reference ref="Titanium.Alloy.Controller"/>
+            <reference ref="Titanium.Alloy.View"/>
+            <reference ref="Titanium.Alloy.Style"/>
+            <reference ref="Titanium.Alloy.Model"/>
+            <reference ref="Titanium.Alloy.Migration"/>
+            <reference ref="Titanium.Alloy.Widget"/>
+        </group>
     </actions>
 </idea-plugin>

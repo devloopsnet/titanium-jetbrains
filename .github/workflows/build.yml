@@ -1,0 +1,61 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+
+      - name: Build plugin
+        run: gradle buildPlugin --no-daemon --stacktrace
+
+      - name: Upload distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: titanium-plugin
+          path: build/distributions/*.zip
+          if-no-files-found: error
+
+  verify:
+    name: Verify plugin
+    runs-on: ubuntu-latest
+    # Plugin Verifier downloads target IDEs (~GB); keep it off the critical path.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+
+      - name: Run Plugin Verifier
+        run: gradle verifyPlugin --no-daemon --stacktrace

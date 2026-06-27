@@ -23,23 +23,29 @@ object AlloyCli {
     private fun settings() = TiSettings.getInstance().state
 
     /**
-     * Build an `alloy generate <component> <name>` command. [appDir] should point at the
-     * project's `app/` directory (Alloy's `-o`/--outputPath).
+     * Build an `alloy generate <component> <positional…> -o <appDir>` command.
+     *
+     * [positional] is the full positional tail after the component, e.g. `["index"]` for a
+     * controller, or `["user", "sql", "name:string", "age:number"]` for a model. Positional args
+     * are kept contiguous (before the `-o` option) so the CLI parses them correctly.
      */
     fun generate(
         component: Component,
-        name: String,
+        positional: List<String>,
         appDir: String,
         platform: String? = null,
-        extraArgs: List<String> = emptyList(),
     ): GeneralCommandLine {
         val exe = settings().alloyPath.ifBlank { "alloy" }
-        val cmd = GeneralCommandLine(exe, "generate", component.cliName, name)
+        val cmd = GeneralCommandLine(exe, "generate", component.cliName)
+        cmd.addParameters(positional)
         cmd.addParameters("-o", appDir, "--no-colors")
         platform?.let { cmd.addParameters("--platform", it) }
-        cmd.addParameters(extraArgs)
         cmd.withWorkDirectory(File(appDir).parentFile ?: File(appDir))
         cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
+        if (settings().nodePath.isNotBlank()) {
+            val existing = System.getenv("PATH").orEmpty()
+            cmd.withEnvironment("PATH", settings().nodePath + File.pathSeparator + existing)
+        }
         return cmd
     }
 }
