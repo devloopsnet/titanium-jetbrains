@@ -11,13 +11,23 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.WebSocket
 import java.util.concurrent.CompletionStage
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /** A paused-execution frame reported by the debugger. */
-data class CdpFrame(val functionName: String, val url: String, val lineNumber: Int, val columnNumber: Int)
+data class CdpFrame(
+    val functionName: String,
+    val url: String,
+    val lineNumber: Int,
+    val columnNumber: Int,
+    val scopeObjectIds: List<String> = emptyList(),
+)
 
 /** A `Debugger.paused` event. */
 data class CdpPaused(val reason: String, val frames: List<CdpFrame>)
+
+/** A variable/property from `Runtime.getProperties`. */
+data class CdpProperty(val name: String, val value: String, val objectId: String?)
 
 /**
  * Minimal Chrome DevTools Protocol client over a WebSocket, used to talk to the debugger the
@@ -34,6 +44,7 @@ class CdpClient(private val host: String, private val port: Int) {
     private val gson = Gson()
     private val nextId = AtomicInteger(1)
     private val buffer = StringBuilder()
+    private val callbacks = ConcurrentHashMap<Int, (JsonObject) -> Unit>()
 
     @Volatile private var ws: WebSocket? = null
 
@@ -96,8 +107,9 @@ class CdpClient(private val host: String, private val port: Int) {
         null
     }
 
-    fun send(method: String, params: Map<String, Any?> = emptyMap()): Int {
+    fun send(method: String, params: Map<String, Any?> = emptyMap(), onResult: ((JsonObject) -> Unit)? = null): Int {
         val id = nextId.getAndIncrement()
+        if (onResult != null) callbacks[id] = onResult
         val payload = gson.toJson(mapOf("id" to id, "method" to method, "params" to params))
         ws?.sendText(payload, true)
         return id
@@ -108,6 +120,23 @@ class CdpClient(private val host: String, private val port: Int) {
             "Debugger.setBreakpointByUrl",
             mapOf("lineNumber" to line, "urlRegex" to ".*${Regex.escape(fileName)}.*"),
         )
+    }
+
+    /** Fetch the (own) properties of a remote object and deliver them to [onResult]. */
+    fun getProperties(objectId: String, onResult: (List<CdpProperty>) -> Unit) {
+        send("Runtime.getProperties", mapOf("objectId" to objectId, "ownProperties" to true)) { result ->
+            val props = (result.getAsJsonArray("result") ?: JsonArray()).mapNotNull { el ->
+                val p = el as? JsonObject ?: return@mapNotNull null
+                val name = p.get("name")?.asString ?: return@mapNotNull null
+                val value = p.getAsJsonObject("value")
+                val description = value?.get("description")?.asString
+                    ?: value?.get("value")?.asString
+                    ?: value?.get("type")?.asString
+                    ?: "undefined"
+                CdpProperty(name, description, value?.get("objectId")?.asString)
+            }
+            onResult(props)
+        }
     }
 
     fun resume() = send("Debugger.resume")
@@ -130,6 +159,15 @@ class CdpClient(private val host: String, private val port: Int) {
             return
         }
         try {
+            // Command responses carry an "id"; events carry a "method".
+            if (obj.has("id") && obj.get("id").isJsonPrimitive) {
+                val id = obj.get("id").asInt
+                val callback = callbacks.remove(id)
+                if (callback != null) {
+                    callback(obj.getAsJsonObject("result") ?: JsonObject())
+                    return
+                }
+            }
             when (obj.get("method")?.asString) {
                 "Debugger.paused" -> onPaused?.invoke(parsePaused(obj.getAsJsonObject("params")))
                 "Debugger.resumed" -> onResumed?.invoke()
@@ -146,11 +184,15 @@ class CdpClient(private val host: String, private val port: Int) {
             val location = f.getAsJsonObject("location")
             val url = f.getAsJsonObject("functionLocation")?.get("scriptId")?.asString
                 ?: f.get("url")?.asString ?: ""
+            val scopeIds = (f.getAsJsonArray("scopeChain") ?: JsonArray()).mapNotNull { scope ->
+                (scope as? JsonObject)?.getAsJsonObject("object")?.get("objectId")?.asString
+            }
             CdpFrame(
                 functionName = f.get("functionName")?.asString?.ifBlank { "anonymous" } ?: "anonymous",
                 url = f.get("url")?.asString ?: url,
                 lineNumber = location?.get("lineNumber")?.asInt ?: 0,
                 columnNumber = location?.get("columnNumber")?.asInt ?: 0,
+                scopeObjectIds = scopeIds,
             )
         }
         return CdpPaused(reason, frames)

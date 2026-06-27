@@ -9,6 +9,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
 import com.tidev.titanium.TiIcons
+import com.tidev.titanium.environment.TiApiMetadata
 
 /** Basic property/value completion inside `.tss` files. Universal (no JS plugin needed). */
 class TssCompletionContributor : CompletionContributor() {
@@ -22,7 +23,9 @@ class TssCompletionContributor : CompletionContributor() {
                     context: ProcessingContext,
                     result: CompletionResultSet,
                 ) {
-                    PROPERTIES.forEach {
+                    val meta = TiApiMetadata.getInstance(parameters.position.project)
+                    val props = if (meta.properties.isNotEmpty()) meta.properties + PROPERTIES else PROPERTIES
+                    props.forEach {
                         result.addElement(LookupElementBuilder.create(it).withIcon(TiIcons.Titanium).withTypeText("property"))
                     }
                     CONSTANTS.forEach {

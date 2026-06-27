@@ -1,5 +1,6 @@
 package com.tidev.titanium.debug
 
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileTypes.FileType
@@ -11,18 +12,67 @@ import com.intellij.xdebugger.XExpression
 import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.evaluation.EvaluationMode
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
+import com.intellij.xdebugger.frame.XCompositeNode
 import com.intellij.xdebugger.frame.XExecutionStack
+import com.intellij.xdebugger.frame.XNamedValue
 import com.intellij.xdebugger.frame.XStackFrame
 import com.intellij.xdebugger.frame.XSuspendContext
+import com.intellij.xdebugger.frame.XValueChildrenList
+import com.intellij.xdebugger.frame.XValueNode
+import com.intellij.xdebugger.frame.XValuePlace
+import com.tidev.titanium.debug.cdp.CdpClient
 
-/** A single stack frame: name + source position (variables not yet wired). */
+/** A single stack frame: name + source position, with locals fetched lazily over CDP. */
 class TiStackFrame(
     private val position: XSourcePosition?,
     private val title: String,
+    private val cdp: CdpClient,
+    private val scopeObjectIds: List<String>,
 ) : XStackFrame() {
+
     override fun getSourcePosition(): XSourcePosition? = position
+
     override fun customizePresentation(component: ColoredTextContainer) {
         component.append(title, SimpleTextAttributes.REGULAR_ATTRIBUTES)
+    }
+
+    override fun computeChildren(node: XCompositeNode) {
+        val scopeId = scopeObjectIds.firstOrNull()
+        if (scopeId == null) {
+            node.addChildren(XValueChildrenList.EMPTY, true)
+            return
+        }
+        cdp.getProperties(scopeId) { props ->
+            val list = XValueChildrenList()
+            props.forEach { list.add(TiValue(it.name, it.value, it.objectId, cdp)) }
+            node.addChildren(list, true)
+        }
+    }
+}
+
+/** A debugger variable; expandable when it references a remote object. */
+class TiValue(
+    name: String,
+    private val value: String,
+    private val objectId: String?,
+    private val cdp: CdpClient,
+) : XNamedValue(name) {
+
+    override fun computePresentation(node: XValueNode, place: XValuePlace) {
+        node.setPresentation(AllIcons.Debugger.Value, null, value, objectId != null)
+    }
+
+    override fun computeChildren(node: XCompositeNode) {
+        val id = objectId
+        if (id == null) {
+            super.computeChildren(node)
+            return
+        }
+        cdp.getProperties(id) { props ->
+            val list = XValueChildrenList()
+            props.forEach { list.add(TiValue(it.name, it.value, it.objectId, cdp)) }
+            node.addChildren(list, true)
+        }
     }
 }
 
@@ -39,7 +89,7 @@ class TiSuspendContext(private val stack: TiExecutionStack) : XSuspendContext() 
     override fun getActiveExecutionStack(): XExecutionStack = stack
 }
 
-/** Minimal editors provider for the debugger expression UI (plain text; evaluation TBD). */
+/** Minimal editors provider for the debugger expression UI (plain text). */
 class TiDebuggerEditorsProvider : XDebuggerEditorsProvider() {
     override fun getFileType(): FileType = PlainTextFileType.INSTANCE
     override fun createDocument(

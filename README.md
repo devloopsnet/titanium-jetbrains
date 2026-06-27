@@ -88,11 +88,19 @@ Locally: `./gradlew signPlugin` and `./gradlew publishPlugin` (with the same env
 ## Notes / known follow-ups
 
 - JSON parsing uses the platform-bundled Gson (`com.google.gson`).
-- **Debugger** is an initial implementation: it builds with `--debug-host`, connects to the runtime's
-  Chrome DevTools endpoint, and bridges breakpoints / stepping / pause. Source-map fidelity, variable
-  inspection and expression evaluation are not wired yet and need validation against a running
-  simulator/device (iOS also needs `ios-webkit-debug-proxy`).
-- TSS uses a flat parser (highlighting + completion). A structured grammar (selectors/blocks) and
-  TSS↔view references are a future enhancement.
-- `ti info` JSON shape varies across CLI/SDK versions — `TiInfoParser` is intentionally defensive;
-  validate device/sim/cert parsing against a real machine and tighten as needed.
+- **Completion** is SDK-backed: `TiApiMetadata` reads the installed SDK's `api.jsca` for real
+  element/property names, falling back to curated lists when it's missing.
+- **Debugger** builds with `--debug-host`, connects over the Chrome DevTools Protocol, and bridges
+  breakpoints / stepping / pause **and local-variable inspection** (`Runtime.getProperties`).
+  Expression evaluation and source-map fidelity are still pending and need validation against a
+  running simulator/device (iOS also needs `ios-webkit-debug-proxy`).
+- **TSS** has lexer highlighting, a flat parser, completion, brace matching and commenting. A
+  structured grammar (selectors/blocks) and TSS↔view references remain a future enhancement.
+- `ti info` JSON shape varies across CLI/SDK versions — `TiInfoParser` is defensive and covered by a
+  unit test (`src/test`); validate against a real machine and tighten as needed.
+- Toolbar platform/device selection persists per-workspace.
+
+### Still open (deliberately)
+- Deeper debugger features (evaluation, watches, source maps).
+- A full TSS grammar with selector/property PSI and cross-file references.
+- Broader test coverage (only the parser is unit-tested so far).

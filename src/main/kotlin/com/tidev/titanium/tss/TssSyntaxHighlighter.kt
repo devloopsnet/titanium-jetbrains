@@ -23,8 +23,8 @@ class TssSyntaxHighlighter : SyntaxHighlighterBase() {
             TssTokenTypes.NUMBER -> NUMBER
             TssTokenTypes.KEYWORD -> KEYWORD
             TssTokenTypes.IDENTIFIER -> IDENTIFIER
-            TssTokenTypes.BRACE -> BRACES
-            TssTokenTypes.BRACKET -> BRACKETS
+            TssTokenTypes.LBRACE, TssTokenTypes.RBRACE -> BRACES
+            TssTokenTypes.LBRACKET, TssTokenTypes.RBRACKET -> BRACKETS
             TssTokenTypes.OPERATOR -> OPERATOR
             TssTokenTypes.BAD_CHARACTER -> BAD_CHAR
             else -> EMPTY

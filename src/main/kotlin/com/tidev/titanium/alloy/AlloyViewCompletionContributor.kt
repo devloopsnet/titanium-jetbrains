@@ -10,6 +10,7 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.xml.XmlTokenType
 import com.intellij.util.ProcessingContext
 import com.tidev.titanium.TiIcons
+import com.tidev.titanium.environment.TiApiMetadata
 
 /**
  * Completion inside Alloy XML views: Titanium UI element tags and common attributes.
@@ -34,12 +35,17 @@ class AlloyViewCompletionContributor : CompletionContributor() {
                     val path = parameters.originalFile.virtualFile?.path ?: return
                     if (!path.contains("/app/views/") && !path.contains("/app/widgets/")) return
 
-                    UI_ELEMENTS.forEach {
+                    // Prefer SDK-generated names (api.jsca); fall back to curated lists.
+                    val meta = TiApiMetadata.getInstance(parameters.position.project)
+                    val elements = if (meta.uiElements.isNotEmpty()) meta.uiElements + UI_ELEMENTS else UI_ELEMENTS
+                    val attrs = if (meta.properties.isNotEmpty()) meta.properties + COMMON_ATTRS else COMMON_ATTRS
+
+                    elements.forEach {
                         result.addElement(
                             LookupElementBuilder.create(it).withIcon(TiIcons.Titanium).withTypeText("Ti.UI"),
                         )
                     }
-                    COMMON_ATTRS.forEach {
+                    attrs.forEach {
                         result.addElement(LookupElementBuilder.create(it).withTypeText("attribute"))
                     }
                 }

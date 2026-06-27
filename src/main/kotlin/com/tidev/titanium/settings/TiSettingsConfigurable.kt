@@ -39,11 +39,17 @@ class TiSettingsConfigurable : BoundSearchableConfigurable(
             row {
                 checkBox("Enable LiveView by default").bindSelected(state::liveViewEnabled)
             }
-            row {
-                checkBox("Run builds in the integrated terminal").bindSelected(state::useTerminalForBuild)
-            }
             row("Distribution output directory:") {
                 textField().bindText(state::distOutputDir).columns(20)
+            }
+        }
+        group("Android Packaging") {
+            row("Default keystore path:") {
+                textField().bindText(state::androidKeystorePath).columns(34)
+                    .comment("Used to pre-fill the Package dialog. Passwords are never stored.")
+            }
+            row("Default key alias:") {
+                textField().bindText(state::androidKeystoreAlias).columns(20)
             }
         }
         group("Alloy") {

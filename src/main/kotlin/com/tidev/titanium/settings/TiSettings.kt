@@ -24,10 +24,13 @@ class TiSettings : PersistentStateComponent<TiSettings.State> {
         @JvmField var alloyPath: String = "alloy"
         @JvmField var nodePath: String = ""
         @JvmField var logLevel: String = "info"
-        @JvmField var useTerminalForBuild: Boolean = true
         @JvmField var defaultI18nLanguage: String = "en"
         @JvmField var distOutputDir: String = "dist"
         @JvmField var liveViewEnabled: Boolean = true
+
+        // Android packaging defaults (non-sensitive only — passwords are never stored).
+        @JvmField var androidKeystorePath: String = ""
+        @JvmField var androidKeystoreAlias: String = ""
     }
 
     private var state = State()

@@ -73,6 +73,8 @@ class TiEnvironmentService(private val project: Project) {
 
             override fun onFinished() {
                 loading.set(false)
+                // Load SDK API metadata for completion (best-effort, background).
+                TiApiMetadata.getInstance(project).refreshFor(environment.selectedSdk?.path)
                 project.messageBus.syncPublisher(CHANGED).environmentChanged(environment)
                 if (notify && lastError == null) {
                     TiNotifications.info(project, TitaniumBundle.message("notification.env.refreshed"))

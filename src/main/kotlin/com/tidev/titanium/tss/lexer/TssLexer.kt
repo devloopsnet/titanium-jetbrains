@@ -47,8 +47,10 @@ class TssLexer : LexerBase() {
             c == '"' || c == '\'' -> consumeString(c)
             c.isDigit() || (c == '-' && peek(1)?.isDigit() == true) -> consumeNumber()
             isIdentStart(c) -> consumeIdentifier()
-            c == '{' || c == '}' -> single(TssTokenTypes.BRACE)
-            c == '[' || c == ']' -> single(TssTokenTypes.BRACKET)
+            c == '{' -> single(TssTokenTypes.LBRACE)
+            c == '}' -> single(TssTokenTypes.RBRACE)
+            c == '[' -> single(TssTokenTypes.LBRACKET)
+            c == ']' -> single(TssTokenTypes.RBRACKET)
             c == ':' || c == ',' || c == ';' || c == '.' || c == '#' -> single(TssTokenTypes.OPERATOR)
             else -> single(TssTokenTypes.BAD_CHARACTER)
         }

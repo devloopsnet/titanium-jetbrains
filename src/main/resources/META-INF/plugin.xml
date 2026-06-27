@@ -59,6 +59,10 @@
                   implementationClass="com.tidev.titanium.tss.TssSyntaxHighlighterFactory"/>
         <lang.parserDefinition language="TSS"
                   implementationClass="com.tidev.titanium.tss.TssParserDefinition"/>
+        <lang.braceMatcher language="TSS"
+                  implementationClass="com.tidev.titanium.tss.TssBraceMatcher"/>
+        <lang.commenter language="TSS"
+                  implementationClass="com.tidev.titanium.tss.TssCommenter"/>
         <completion.contributor language="TSS"
                   implementationClass="com.tidev.titanium.tss.TssCompletionContributor"/>
 
@@ -94,10 +98,45 @@
     </extensions>
 
     <actions>
-        <!-- Tool-window toolbar actions are built inline in TiExplorerPanel.
-             Menu-level actions live in the Titanium group under Tools. -->
-        <group id="Titanium.MainGroup" text="Titanium" popup="true" icon="/icons/titanium.svg">
+        <!-- Standalone actions (defined first so groups below can reference them). -->
+        <action id="Titanium.Build"
+                class="com.tidev.titanium.actions.TiBuildAction"
+                icon="AllIcons.Actions.Execute"
+                text="Build &amp; Run Titanium App"
+                description="Build and run the selected (or default) Titanium configuration"/>
+        <action id="Titanium.Debug"
+                class="com.tidev.titanium.actions.TiDebugAction"
+                icon="AllIcons.Actions.StartDebugger"
+                text="Debug Titanium App"
+                description="Debug the selected (or default) Titanium configuration"/>
+        <action id="Titanium.Clean"
+                class="com.tidev.titanium.actions.TiCleanAction"
+                icon="AllIcons.Actions.GC"
+                text="Clean Titanium Project"
+                description="Run `ti clean` for the current project"/>
+        <action id="Titanium.RefreshEnv"
+                class="com.tidev.titanium.actions.TiRefreshEnvironmentAction"
+                icon="AllIcons.Actions.Refresh"
+                text="Refresh Titanium Environment"
+                description="Re-run `ti info` to refresh SDKs, simulators and devices"/>
+        <action id="Titanium.Package"
+                class="com.tidev.titanium.actions.pkg.TiPackageAction"
+                icon="AllIcons.Nodes.Artifact"
+                text="Package for Distribution…"
+                description="Distribution build: App Store / Ad Hoc (iOS) or Play Store (Android)"/>
+
+        <!-- Menu: Tools | Titanium. -->
+        <group id="Titanium.MainGroup" text="Titanium" popup="true" icon="/icons/titanium.svg"
+               description="Titanium actions">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
+
+            <reference ref="Titanium.Build"/>
+            <reference ref="Titanium.Debug"/>
+            <reference ref="Titanium.Package"/>
+            <reference ref="Titanium.Clean"/>
+            <reference ref="Titanium.RefreshEnv"/>
+
+            <separator/>
 
             <action id="Titanium.CreateApp"
                     class="com.tidev.titanium.actions.create.TiCreateAppAction"
@@ -166,14 +205,45 @@
                         class="com.tidev.titanium.actions.sdk.TiCheckUpdatesAction"
                         text="Check for Updates"
                         description="Check whether a newer Titanium SDK is available"/>
+                <action id="Titanium.CreateKeystore"
+                        class="com.tidev.titanium.actions.pkg.TiCreateKeystoreAction"
+                        text="Create Android Keystore…"
+                        description="Generate an Android signing keystore with keytool"/>
             </group>
 
             <separator/>
 
-            <action id="Titanium.Clean"
-                    class="com.tidev.titanium.actions.TiCleanAction"
-                    icon="AllIcons.Actions.GC"
-                    text="Clean Titanium Project"/>
+            <action id="Titanium.LiveView"
+                    class="com.tidev.titanium.actions.TiLiveViewToggleAction"
+                    text="Enable LiveView"
+                    description="Toggle LiveView (--liveview) for dev builds"/>
+            <action id="Titanium.SetLogLevel"
+                    class="com.tidev.titanium.actions.TiSetLogLevelAction"
+                    text="Set Log Level…"
+                    description="Choose the CLI log level"/>
+
+        </group>
+
+        <!-- Platform + device pickers (values resolved from `ti info`). -->
+        <action id="Titanium.SelectPlatform"
+                class="com.tidev.titanium.actions.TiPlatformComboAction"
+                text="Platform" description="Choose the platform to run on"/>
+        <action id="Titanium.SelectDevice"
+                class="com.tidev.titanium.actions.TiDeviceComboAction"
+                text="Device" description="Choose the device/simulator to run on"/>
+
+        <!-- Main (top) toolbar: platform/device pickers + Build / Debug / Clean / Refresh + Titanium dropdown. -->
+        <group id="Titanium.Toolbar">
+            <add-to-group group-id="MainToolbarRight" anchor="last"/>
+            <reference ref="Titanium.SelectPlatform"/>
+            <reference ref="Titanium.SelectDevice"/>
+            <separator/>
+            <reference ref="Titanium.Build"/>
+            <reference ref="Titanium.Debug"/>
+            <reference ref="Titanium.Package"/>
+            <reference ref="Titanium.Clean"/>
+            <reference ref="Titanium.RefreshEnv"/>
+            <reference ref="Titanium.MainGroup"/>
         </group>
 
         <!-- Also offer the Alloy generators from the project-view right-click menu. -->

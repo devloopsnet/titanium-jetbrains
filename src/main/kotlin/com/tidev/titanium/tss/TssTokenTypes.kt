@@ -13,8 +13,10 @@ object TssTokenTypes {
     @JvmField val NUMBER = TssTokenType("TSS_NUMBER")
     @JvmField val KEYWORD = TssTokenType("TSS_KEYWORD")
     @JvmField val IDENTIFIER = TssTokenType("TSS_IDENTIFIER")
-    @JvmField val BRACE = TssTokenType("TSS_BRACE")
-    @JvmField val BRACKET = TssTokenType("TSS_BRACKET")
+    @JvmField val LBRACE = TssTokenType("TSS_LBRACE")
+    @JvmField val RBRACE = TssTokenType("TSS_RBRACE")
+    @JvmField val LBRACKET = TssTokenType("TSS_LBRACKET")
+    @JvmField val RBRACKET = TssTokenType("TSS_RBRACKET")
     @JvmField val OPERATOR = TssTokenType("TSS_OPERATOR")
     @JvmField val BAD_CHARACTER = TssTokenType("TSS_BAD_CHARACTER")
 }

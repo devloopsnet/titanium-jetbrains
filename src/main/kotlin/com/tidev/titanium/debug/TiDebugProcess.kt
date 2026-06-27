@@ -104,7 +104,9 @@ class TiDebugProcess(
     }
 
     private fun handlePaused(paused: CdpPaused) {
-        val frames = paused.frames.map { TiStackFrame(sourcePosition(it), it.functionName) }
+        val frames = paused.frames.map {
+            TiStackFrame(sourcePosition(it), it.functionName, cdp, it.scopeObjectIds)
+        }
         session.positionReached(TiSuspendContext(TiExecutionStack(frames)))
     }
 
