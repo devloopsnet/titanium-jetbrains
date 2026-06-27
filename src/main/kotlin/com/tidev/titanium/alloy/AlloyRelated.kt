@@ -28,7 +28,7 @@ enum class AlloyKind(val dir: String, val ext: String) {
 object AlloyRelated {
 
     /** The `app/` root for [file], or null if it isn't inside an Alloy project. */
-    private fun appRoot(file: VirtualFile): VirtualFile? {
+    fun appRoot(file: VirtualFile): VirtualFile? {
         var dir = file.parent
         while (dir != null) {
             if (dir.name == "app" && dir.parent != null) return dir

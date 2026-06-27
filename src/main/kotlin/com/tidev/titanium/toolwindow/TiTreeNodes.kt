@@ -48,6 +48,11 @@ data class SdkNode(val sdk: TiSdk) : TiNode {
     override val icon get() = AllIcons.Nodes.Library
 }
 
+data class IssuesGroupNode(val count: Int) : TiNode {
+    override val label get() = "Environment issues ($count)"
+    override val icon get() = AllIcons.General.Warning
+}
+
 data class MessageNode(override val label: String, val warning: Boolean = false) : TiNode {
     override val icon get() = if (warning) AllIcons.General.Warning else AllIcons.General.Information
 }

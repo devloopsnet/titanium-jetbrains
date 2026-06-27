@@ -66,9 +66,21 @@
         <completion.contributor language="TSS"
                   implementationClass="com.tidev.titanium.tss.TssCompletionContributor"/>
 
-        <!-- Alloy XML view completion. Universal (XML support is everywhere). -->
+        <!-- Alloy XML view + tiapp.xml completion. Universal (XML support is everywhere). -->
         <completion.contributor language="XML"
             implementationClass="com.tidev.titanium.alloy.AlloyViewCompletionContributor"/>
+        <completion.contributor language="XML"
+            implementationClass="com.tidev.titanium.alloy.AlloyTiappCompletionContributor"/>
+
+        <!-- Hover / quick-doc from api.jsca descriptions. -->
+        <lang.documentationProvider language="XML"
+            implementationClass="com.tidev.titanium.alloy.AlloyDocumentationProvider"/>
+        <lang.documentationProvider language="TSS"
+            implementationClass="com.tidev.titanium.alloy.AlloyDocumentationProvider"/>
+
+        <!-- Go-to-definition: event handler -> controller, i18n key -> strings.xml. -->
+        <gotoDeclarationHandler
+            implementation="com.tidev.titanium.alloy.AlloyGotoDeclarationHandler"/>
 
         <!-- Related-file gutter navigation (views/styles). JS controllers handled in optional file. -->
         <codeInsight.lineMarkerProvider language="XML"
@@ -76,10 +88,20 @@
         <codeInsight.lineMarkerProvider language="TSS"
             implementationClass="com.tidev.titanium.alloy.AlloyRelatedLineMarkerProvider"/>
 
-        <!-- Generate a missing Alloy event handler in the controller. -->
+        <!-- Code intentions for Alloy views. -->
         <intentionAction>
             <language>XML</language>
             <className>com.tidev.titanium.intentions.AlloyInsertHandlerIntention</className>
+            <category>Titanium</category>
+        </intentionAction>
+        <intentionAction>
+            <language>XML</language>
+            <className>com.tidev.titanium.intentions.AlloyInsertI18nIntention</className>
+            <category>Titanium</category>
+        </intentionAction>
+        <intentionAction>
+            <language>XML</language>
+            <className>com.tidev.titanium.intentions.AlloyExtractStyleIntention</className>
             <category>Titanium</category>
         </intentionAction>
 

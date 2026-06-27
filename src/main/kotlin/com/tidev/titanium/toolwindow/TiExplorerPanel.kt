@@ -131,6 +131,12 @@ class TiExplorerPanel(private val project: Project, parent: Disposable) : Simple
             root.add(sdkGroup)
         }
 
+        if (env.issues.isNotEmpty()) {
+            val issuesNode = tiNode(IssuesGroupNode(env.issues.size))
+            env.issues.forEach { issuesNode.add(tiNode(MessageNode(it, warning = true))) }
+            root.add(issuesNode)
+        }
+
         treeModel.reload()
         // Expand the project + platform rows for convenience.
         for (i in 0 until tree.rowCount) tree.expandRow(i)

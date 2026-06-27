@@ -30,6 +30,11 @@ class TiApiMetadata(private val project: Project) {
     var properties: Set<String> = emptySet()
         private set
 
+    /** Short name (type or property) → one-line summary, for hover docs. */
+    @Volatile
+    var descriptions: Map<String, String> = emptyMap()
+        private set
+
     val isLoaded: Boolean get() = loadedPath != null
 
     /** Load metadata for [sdkPath] (the SDK install dir) on a background thread, once per path. */
@@ -47,19 +52,27 @@ class TiApiMetadata(private val project: Project) {
             val types = root.getAsJsonArray("types") ?: return
             val ui = sortedSetOf<String>()
             val props = sortedSetOf<String>()
+            val docs = HashMap<String, String>()
             types.forEach { element ->
                 val type = element as? JsonObject ?: return@forEach
                 val name = type.get("name")?.asString ?: return@forEach
                 if (name.startsWith("Titanium.UI.") || name.startsWith("Ti.UI.")) {
                     val short = name.substringAfterLast('.')
-                    if (short.isNotBlank() && short[0].isUpperCase()) ui += short
+                    if (short.isNotBlank() && short[0].isUpperCase()) {
+                        ui += short
+                        type.get("description")?.asString?.takeIf { it.isNotBlank() }?.let { docs.putIfAbsent(short, it) }
+                    }
                 }
                 type.getAsJsonArray("properties")?.forEach { p ->
-                    (p as? JsonObject)?.get("name")?.asString?.let { props += it }
+                    val prop = p as? JsonObject ?: return@forEach
+                    val propName = prop.get("name")?.asString ?: return@forEach
+                    props += propName
+                    prop.get("description")?.asString?.takeIf { it.isNotBlank() }?.let { docs.putIfAbsent(propName, it) }
                 }
             }
             uiElements = ui
             properties = props
+            descriptions = docs
             loadedPath = path
             log.info("Loaded Titanium API metadata: ${ui.size} UI types, ${props.size} properties")
         } catch (t: Throwable) {

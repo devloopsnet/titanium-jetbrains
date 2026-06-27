@@ -77,7 +77,14 @@ class TiEnvironmentService(private val project: Project) {
                 TiApiMetadata.getInstance(project).refreshFor(environment.selectedSdk?.path)
                 project.messageBus.syncPublisher(CHANGED).environmentChanged(environment)
                 if (notify && lastError == null) {
-                    TiNotifications.info(project, TitaniumBundle.message("notification.env.refreshed"))
+                    if (environment.issues.isEmpty()) {
+                        TiNotifications.info(project, TitaniumBundle.message("notification.env.refreshed"))
+                    } else {
+                        TiNotifications.warn(
+                            project,
+                            "Titanium environment has ${environment.issues.size} issue(s). See the Titanium tool window.",
+                        )
+                    }
                 }
             }
         }.queue()

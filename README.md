@@ -100,7 +100,16 @@ Locally: `./gradlew signPlugin` and `./gradlew publishPlugin` (with the same env
   unit test (`src/test`); validate against a real machine and tighten as needed.
 - Toolbar platform/device selection persists per-workspace.
 
+### Editor intelligence
+- Completion for Alloy views, **tiapp.xml**, TSS, and JS controllers.
+- **Hover / quick-doc** from the SDK's `api.jsca` descriptions.
+- **Go-to-definition**: event handler → controller function, i18n key → `strings.xml`.
+- Code intentions: insert event handler, **insert i18n string**, **extract style to TSS**.
+- Related-file gutter markers + Open-Related actions.
+- Environment issues from `ti info` are surfaced in the Titanium tool window.
+
 ### Still open (deliberately)
-- Deeper debugger features (evaluation, watches, source maps).
-- A full TSS grammar with selector/property PSI and cross-file references.
+- Symbol-level view↔TSS resolution (needs a full TSS grammar/PSI).
+- Deeper debugger features (expression evaluation, watches, source maps).
+- Recent-builds history and CLI/Alloy self-update.
 - Broader test coverage (only the parser is unit-tested so far).
