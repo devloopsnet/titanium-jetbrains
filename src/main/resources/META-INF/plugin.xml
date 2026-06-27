@@ -210,6 +210,11 @@
                         text="Style">
                     <keyboard-shortcut keymap="$default" first-keystroke="control alt S"/>
                 </action>
+                <action id="Titanium.Alloy.OpenAll"
+                        class="com.tidev.titanium.actions.alloy.OpenAllRelatedFilesAction"
+                        text="All Related Files">
+                    <keyboard-shortcut keymap="$default" first-keystroke="control alt A"/>
+                </action>
             </group>
 
             <separator/>
@@ -227,6 +232,15 @@
                         class="com.tidev.titanium.actions.sdk.TiCheckUpdatesAction"
                         text="Check for Updates"
                         description="Check whether a newer Titanium SDK is available"/>
+                <separator/>
+                <action id="Titanium.Sdk.UpdateCli"
+                        class="com.tidev.titanium.actions.sdk.TiUpdateCliAction"
+                        text="Update Titanium CLI"
+                        description="npm install -g titanium"/>
+                <action id="Titanium.Sdk.UpdateAlloy"
+                        class="com.tidev.titanium.actions.sdk.TiUpdateAlloyAction"
+                        text="Update Alloy CLI"
+                        description="npm install -g alloy"/>
                 <action id="Titanium.CreateKeystore"
                         class="com.tidev.titanium.actions.pkg.TiCreateKeystoreAction"
                         text="Create Android Keystore…"

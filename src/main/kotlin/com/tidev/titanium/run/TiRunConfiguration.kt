@@ -55,7 +55,7 @@ class TiRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
             ?: throw RuntimeConfigurationError("No Titanium project directory.")
         return object : CommandLineState(environment) {
             init {
-                addConsoleFilters(UrlFilter())
+                addConsoleFilters(UrlFilter(), TiFilePathFilter(project))
             }
 
             override fun startProcess(): ProcessHandler {

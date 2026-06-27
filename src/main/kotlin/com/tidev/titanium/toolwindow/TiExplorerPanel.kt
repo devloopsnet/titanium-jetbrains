@@ -64,7 +64,8 @@ class TiExplorerPanel(private val project: Project, parent: Disposable) : Simple
             add(object : AnAction("Build Selected", "Build & run the selected target", AllIcons.Actions.Execute) {
                 override fun getActionUpdateThread() = ActionUpdateThread.EDT
                 override fun update(e: AnActionEvent) {
-                    e.presentation.isEnabled = selectedPayload() is DeviceNode || selectedPayload() is TargetNode
+                    val p = selectedPayload()
+                    e.presentation.isEnabled = p is DeviceNode || p is TargetNode || p is RecentBuildNode
                 }
                 override fun actionPerformed(e: AnActionEvent) { runSelected() }
             })
@@ -75,6 +76,16 @@ class TiExplorerPanel(private val project: Project, parent: Disposable) : Simple
                 }
                 override fun actionPerformed(e: AnActionEvent) {
                     TiEnvironmentService.getInstance(project).refresh(notify = true)
+                }
+            })
+            add(object : AnAction("Clear Recent Builds", "Clear the recent-builds list", AllIcons.Actions.GC) {
+                override fun getActionUpdateThread() = ActionUpdateThread.EDT
+                override fun update(e: AnActionEvent) {
+                    e.presentation.isEnabled = com.tidev.titanium.run.TiRecentBuilds.getInstance(project).recents.isNotEmpty()
+                }
+                override fun actionPerformed(e: AnActionEvent) {
+                    com.tidev.titanium.run.TiRecentBuilds.getInstance(project).clear()
+                    rebuild(TiEnvironmentService.getInstance(project).environment)
                 }
             })
         }
@@ -90,6 +101,7 @@ class TiExplorerPanel(private val project: Project, parent: Disposable) : Simple
         when (val payload = selectedPayload()) {
             is DeviceNode -> { TiRunLauncher.launchDevice(project, payload.device); return true }
             is TargetNode -> { TiRunLauncher.launchTarget(project, payload.platform, payload.target); return true }
+            is RecentBuildNode -> { TiRunLauncher.launchRecent(project, payload.recent); return true }
             else -> return false
         }
     }
@@ -104,6 +116,13 @@ class TiExplorerPanel(private val project: Project, parent: Disposable) : Simple
             return
         }
         root.add(tiNode(ProjectNode(primary.display, primary.type.name.lowercase())))
+
+        val recents = com.tidev.titanium.run.TiRecentBuilds.getInstance(project).recents
+        if (recents.isNotEmpty()) {
+            val recentNode = tiNode(RecentGroupNode(recents.size))
+            recents.forEach { recentNode.add(tiNode(RecentBuildNode(it))) }
+            root.add(recentNode)
+        }
 
         val svc = TiEnvironmentService.getInstance(project)
         if (!svc.cliAvailable) {

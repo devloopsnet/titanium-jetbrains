@@ -40,8 +40,9 @@ class AlloyInsertHandlerIntention : PsiElementBaseIntentionAction() {
         val document = FileDocumentManager.getInstance().getDocument(controller) ?: return
 
         WriteCommandAction.runWriteCommandAction(project, getText(), "Titanium", {
-            val snippet = "\nfunction $handler(e) {\n    \n}\n"
-            document.insertString(document.textLength, snippet)
+            val template = com.tidev.titanium.settings.TiSettings.getInstance().state.jsFunctionTemplate
+            val body = template.replace("{name}", handler).ifBlank { "function $handler(e) {\n}" }
+            document.insertString(document.textLength, "\n$body\n")
             FileDocumentManager.getInstance().saveDocument(document)
         })
         FileEditorManager.getInstance(project).openFile(controller, true)

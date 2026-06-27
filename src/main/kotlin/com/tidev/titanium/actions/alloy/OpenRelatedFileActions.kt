@@ -35,3 +35,21 @@ abstract class OpenRelatedFileAction(private val target: AlloyKind) : AnAction()
 class OpenRelatedControllerAction : OpenRelatedFileAction(AlloyKind.CONTROLLER)
 class OpenRelatedViewAction : OpenRelatedFileAction(AlloyKind.VIEW)
 class OpenRelatedStyleAction : OpenRelatedFileAction(AlloyKind.STYLE)
+
+/** Open every related Alloy file (controller + view + style) for the current file. */
+class OpenAllRelatedFilesAction : AnAction(), DumbAware {
+    override fun getActionUpdateThread() = ActionUpdateThread.BGT
+
+    override fun update(e: AnActionEvent) {
+        val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
+        e.presentation.isEnabledAndVisible = file != null && AlloyKind.of(file) != null
+    }
+
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = e.project ?: return
+        val file = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+        AlloyRelated.allRelated(file).forEach {
+            FileEditorManager.getInstance(project).openTextEditor(OpenFileDescriptor(project, it), false)
+        }
+    }
+}

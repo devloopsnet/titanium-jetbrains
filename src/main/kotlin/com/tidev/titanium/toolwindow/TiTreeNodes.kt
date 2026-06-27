@@ -53,6 +53,16 @@ data class IssuesGroupNode(val count: Int) : TiNode {
     override val icon get() = AllIcons.General.Warning
 }
 
+data class RecentGroupNode(val count: Int) : TiNode {
+    override val label get() = "Recent builds"
+    override val icon get() = AllIcons.Vcs.History
+}
+
+data class RecentBuildNode(val recent: com.tidev.titanium.run.RecentBuild) : TiNode {
+    override val label get() = recent.label
+    override val icon get() = AllIcons.Actions.Execute
+}
+
 data class MessageNode(override val label: String, val warning: Boolean = false) : TiNode {
     override val icon get() = if (warning) AllIcons.General.Warning else AllIcons.General.Information
 }

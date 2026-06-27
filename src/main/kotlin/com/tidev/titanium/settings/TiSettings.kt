@@ -28,6 +28,12 @@ class TiSettings : PersistentStateComponent<TiSettings.State> {
         @JvmField var distOutputDir: String = "dist"
         @JvmField var liveViewEnabled: Boolean = true
 
+        // Default parent directory for new projects (blank = the open project's directory).
+        @JvmField var defaultCreationDirectory: String = ""
+
+        // Template for the "insert event handler" intention; {name} is replaced by the handler.
+        @JvmField var jsFunctionTemplate: String = "function {name}(e) {\n    \n}"
+
         // Android packaging defaults (non-sensitive only — passwords are never stored).
         @JvmField var androidKeystorePath: String = ""
         @JvmField var androidKeystoreAlias: String = ""

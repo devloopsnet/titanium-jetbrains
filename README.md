@@ -108,8 +108,12 @@ Locally: `./gradlew signPlugin` and `./gradlew publishPlugin` (with the same env
 - Related-file gutter markers + Open-Related actions.
 - Environment issues from `ti info` are surfaced in the Titanium tool window.
 
+- **Recent builds** are remembered per-workspace and re-runnable from the tool window.
+- **Open All Related Files** (Ctrl+Alt+A); clickable file paths in build/package consoles.
+- **Update Titanium CLI / Alloy** actions (`npm i -g …`) in the SDK menu.
+
 ### Still open (deliberately)
 - Symbol-level view↔TSS resolution (needs a full TSS grammar/PSI).
 - Deeper debugger features (expression evaluation, watches, source maps).
-- Recent-builds history and CLI/Alloy self-update.
 - Broader test coverage (only the parser is unit-tested so far).
+- Validation of the debugger, `api.jsca` completion, and `ti info` parsing against a real install.

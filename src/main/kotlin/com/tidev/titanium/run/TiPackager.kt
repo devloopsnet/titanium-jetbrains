@@ -17,6 +17,7 @@ object TiPackager {
             .withTitle(title)
             .withActivateToolWindow(true)
             .withFilter(UrlFilter())
+            .withFilter(TiFilePathFilter(project))
             .withStop({ handler.destroyProcess() }, { !handler.isProcessTerminated })
             .run()
     }

@@ -42,6 +42,16 @@ class TiSettingsConfigurable : BoundSearchableConfigurable(
             row("Distribution output directory:") {
                 textField().bindText(state::distOutputDir).columns(20)
             }
+            row("Default new-project directory:") {
+                textField().bindText(state::defaultCreationDirectory).columns(34)
+                    .comment("Where Create App/Module defaults to (blank = current project directory).")
+            }
+        }
+        group("Code Templates") {
+            row("Event handler function:") {
+                textField().bindText(state::jsFunctionTemplate).columns(34)
+                    .comment("Used by the \"create event handler\" intention. {name} = handler name.")
+            }
         }
         group("Android Packaging") {
             row("Default keystore path:") {

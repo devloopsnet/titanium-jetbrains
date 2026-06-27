@@ -60,6 +60,15 @@ object TiRunLauncher {
     private fun defaultTarget(platform: TiPlatform): TiTarget =
         if (platform == TiPlatform.IOS) TiTarget.IOS_SIMULATOR else TiTarget.ANDROID_EMULATOR
 
+    /** Re-run a previously launched build from the Recent list. */
+    fun launchRecent(project: Project, recent: RecentBuild, executor: Executor = runExecutor()) {
+        launch(project, recent.label, executor) { options ->
+            options.platform = recent.platform
+            options.target = recent.target
+            options.deviceId = recent.deviceId
+        }
+    }
+
     private fun launch(
         project: Project,
         name: String,
@@ -76,6 +85,10 @@ object TiRunLauncher {
 
         runManager.addConfiguration(settings)
         runManager.selectedConfiguration = settings
+
+        val o = config.tiOptions
+        TiRecentBuilds.getInstance(project).add(name, o.platform, o.target, o.deviceId)
+
         ProgramRunnerUtil.executeConfiguration(settings, executor)
     }
 }

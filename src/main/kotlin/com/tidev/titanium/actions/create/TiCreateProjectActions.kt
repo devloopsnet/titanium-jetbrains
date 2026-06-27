@@ -27,7 +27,10 @@ abstract class TiCreateProjectAction(private val type: TiProjectType) : AnAction
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val defaultLocation = project.guessProjectDir()?.path ?: System.getProperty("user.home")
+        val configured = com.tidev.titanium.settings.TiSettings.getInstance().state.defaultCreationDirectory
+        val defaultLocation = configured.ifBlank {
+            project.guessProjectDir()?.path ?: System.getProperty("user.home")
+        }
         val dialog = TiCreateProjectDialog(project, type, defaultLocation)
         if (!dialog.showAndGet()) return
 
