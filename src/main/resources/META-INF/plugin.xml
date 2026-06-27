@@ -1,0 +1,71 @@
+<idea-plugin>
+    <id>com.tidev.titanium</id>
+    <name>Titanium</name>
+    <vendor url="https://titaniumsdk.com">Titanium Community</vendor>
+
+    <description><![CDATA[
+        <p>Develop <a href="https://titaniumsdk.com">Titanium SDK</a> apps and modules from any
+        JetBrains IDE. Build, run, and clean apps on iOS simulators / Android emulators / devices,
+        detect your environment, scaffold projects, and author Alloy views &amp; TSS styles.</p>
+        <p>The core works on <b>every</b> IntelliJ-Platform IDE, including Community editions.
+        JavaScript-controller intelligence lights up automatically on IDEs that ship the bundled
+        JavaScript plugin (WebStorm, IDEA Ultimate, PhpStorm, PyCharm Pro, …).</p>
+    ]]></description>
+
+    <!-- Universal hard dependency: present in EVERY IntelliJ-Platform IDE (incl. Community). -->
+    <depends>com.intellij.modules.platform</depends>
+    <!-- XML support is also universal; we use it for Alloy view completion. -->
+    <depends>com.intellij.modules.xml</depends>
+
+    <!-- OPTIONAL: loads titanium-javascript.xml ONLY when the JavaScript plugin is present.
+         This is what lets the plugin run on Community IDEs while still offering JS-controller
+         intelligence on JS-bearing IDEs. -->
+    <depends optional="true" config-file="titanium-javascript.xml">JavaScript</depends>
+
+    <resource-bundle>messages.TitaniumBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Run configuration: the idiomatic home for build/run/clean. -->
+        <configurationType implementation="com.tidev.titanium.run.TiRunConfigurationType"/>
+        <runConfigurationProducer
+            implementation="com.tidev.titanium.run.TiRunConfigurationProducer"/>
+
+        <!-- Build explorer tool window (the VSCode activity-bar equivalent). -->
+        <toolWindow id="Titanium"
+                    anchor="left"
+                    icon="/icons/toolwindow.svg"
+                    factoryClass="com.tidev.titanium.toolwindow.TiToolWindowFactory"/>
+
+        <!-- Settings page under Tools. -->
+        <applicationConfigurable parentId="tools"
+                                 id="com.tidev.titanium.settings"
+                                 instance="com.tidev.titanium.settings.TiSettingsConfigurable"
+                                 displayName="Titanium"/>
+
+        <!-- Custom .tss file type (Alloy styles). Universal — needs no JS plugin. -->
+        <fileType name="Alloy Style (TSS)"
+                  language="TSS"
+                  extensions="tss"
+                  fieldName="INSTANCE"
+                  implementationClass="com.tidev.titanium.tss.TssFileType"/>
+
+        <!-- Alloy XML view completion. Universal (XML support is everywhere). -->
+        <completion.contributor language="XML"
+            implementationClass="com.tidev.titanium.alloy.AlloyViewCompletionContributor"/>
+
+        <!-- Notifications. -->
+        <notificationGroup id="Titanium" displayType="BALLOON"/>
+
+        <postStartupActivity implementation="com.tidev.titanium.core.TiStartupActivity"/>
+    </extensions>
+
+    <actions>
+        <!-- Tool-window toolbar actions are built inline in TiExplorerPanel.
+             Menu-level actions are registered here. -->
+        <action id="Titanium.Clean"
+                class="com.tidev.titanium.actions.TiCleanAction"
+                icon="AllIcons.Actions.GC">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

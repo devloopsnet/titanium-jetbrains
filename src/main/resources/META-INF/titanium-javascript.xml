@@ -1,0 +1,19 @@
+<!--
+  OPTIONAL content, loaded by the platform ONLY when the bundled `JavaScript`
+  plugin is installed and enabled (see the optional <depends> in plugin.xml).
+
+  This is a PARTIAL descriptor: no <id>, <name>, or <depends>. It must contain
+  ONLY extensions that target the JavaScript language or import
+  `com.intellij.lang.javascript.*`. Everything that can run without the JS plugin
+  belongs in the main plugin.xml instead.
+
+  On Community IDEs this file is never loaded, so the JS features are simply
+  absent and the rest of the plugin is unaffected.
+-->
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Completion inside Alloy JS controllers: $.<id>, Alloy.*, Ti.* … -->
+        <completion.contributor language="JavaScript"
+            implementationClass="com.tidev.titanium.alloy.js.AlloyControllerCompletionContributor"/>
+    </extensions>
+</idea-plugin>
