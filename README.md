@@ -8,7 +8,7 @@ The **core runs on every IntelliJ-Platform IDE**, including Community editions (
 PyCharm Community) and Android Studio. JavaScript-controller intelligence lights up automatically on
 IDEs that ship the bundled JavaScript plugin (WebStorm, IDEA Ultimate, PhpStorm, PyCharm Pro, …).
 
-## What's in this scaffold (Phase 0–2 + slices of 3–5)
+## Feature status (all phases)
 
 | Area | Status | Files |
 |---|---|---|
@@ -18,17 +18,23 @@ IDEs that ship the bundled JavaScript plugin (WebStorm, IDEA Ultimate, PhpStorm,
 | `ti info --output json` parser → environment model | ✅ | `cli/model/*` |
 | Environment service (cache + background refresh) | ✅ | `environment/TiEnvironmentService.kt` |
 | Project discovery (tiapp.xml / timodule.xml) | ✅ | `project/*` |
-| Build/run **run configuration** (platform/target/device/SDK/…) | ✅ | `run/*` |
-| Run-config producer from `tiapp.xml` context | ✅ | `run/TiRunConfigurationProducer.kt` |
-| Build-explorer **tool window** (tree + double-click run) | ✅ | `toolwindow/*` |
+| Build/run **run configuration** + `tiapp.xml` producer | ✅ | `run/*` |
+| Build-explorer + Help **tool windows** | ✅ | `toolwindow/*` |
 | `ti clean` action | ✅ | `actions/TiCleanAction.kt` |
-| Settings (CLI paths, log level, …) + persistence | ✅ | `settings/*` |
-| `.tss` file type | ✅ | `tss/TssLanguage.kt` |
+| Settings + persistence | ✅ | `settings/*` |
+| **Create app / module wizards** (`ti create`) | ✅ | `actions/create/*` |
+| **Alloy generators** (controller/view/style/model/migration/widget) | ✅ | `actions/alloy/*` |
+| **SDK & update management** (install/select/check) | ✅ | `sdk/*`, `actions/sdk/*` |
+| `.tss` language: lexer, highlighting, flat parser, completion | ✅ | `tss/*` |
 | Alloy XML view completion (**universal**) | ✅ | `alloy/AlloyViewCompletionContributor.kt` |
-| JS controller completion (**optional**, JS-bearing IDEs) | ✅ | `alloy/js/AlloyControllerCompletionContributor.kt` |
+| **Related-file gutter markers + Open-Related actions** | ✅ | `alloy/AlloyRelated*`, `actions/alloy/OpenRelatedFileActions.kt` |
+| **Insert-handler intention** | ✅ | `intentions/AlloyInsertHandlerIntention.kt` |
+| **Live templates** (`ti*`, `al*`) | ✅ | `resources/liveTemplates/*` |
+| JS controller completion + markers (**optional**) | ✅ | `alloy/js/*`, `titanium-javascript.xml` |
+| **Debugger** over Chrome DevTools Protocol (experimental) | ✅ | `debug/*` |
+| **CI + release pipeline**, LICENSE, CHANGELOG | ✅ | `.github/workflows/*`, `LICENSE`, `CHANGELOG.md` |
 
-Next (see `titanium-webstorm-plugin-plan.md`): scaffolding wizards & Alloy generators (Phase 3),
-SDK/update management (Phase 4), TSS grammar + references/intentions (Phase 5), debugger (Phase 6).
+All roadmap phases (0–7) are implemented. The debugger is an initial implementation (see Notes).
 
 ## The run-everywhere trick
 
@@ -70,12 +76,23 @@ To prove the optional split, run `verifyPlugin` / `runIde` against a Community I
 `platformType=IC` only for a verification run (note: the JS completion will be absent there, as
 intended; do not compile the JS code against IC).
 
+## Publishing to the JetBrains Marketplace
+
+1. Create the plugin's signing key (`openssl`) and a Marketplace token (Account → My Tokens).
+2. Add repo secrets: `PUBLISH_TOKEN`, `CERTIFICATE_CHAIN`, `PRIVATE_KEY`, `PRIVATE_KEY_PASSWORD`.
+3. Tag a release: `git tag v0.1.0 && git push --tags`. The **Release** workflow verifies, signs and
+   publishes; the first version must also be approved once in the Marketplace UI.
+
+Locally: `./gradlew signPlugin` and `./gradlew publishPlugin` (with the same env vars set).
+
 ## Notes / known follow-ups
 
 - JSON parsing uses the platform-bundled Gson (`com.google.gson`).
-- The `.tss` file type currently opens as plain text; a lexer/parser + highlighter is a Phase-5 task.
-- `ti info` JSON shape varies across CLI/SDK versions — `TiInfoParser` is intentionally defensive and
-  best-effort; validate device/sim/cert parsing against a real machine and tighten as needed.
-- This was authored without a compile pass against the IntelliJ SDK (no SDK/Gradle in the authoring
-  environment). The code is written to compile against the 2024.3 platform; expect to resolve a small
-  number of API drift issues on first `runIde`.
+- **Debugger** is an initial implementation: it builds with `--debug-host`, connects to the runtime's
+  Chrome DevTools endpoint, and bridges breakpoints / stepping / pause. Source-map fidelity, variable
+  inspection and expression evaluation are not wired yet and need validation against a running
+  simulator/device (iOS also needs `ios-webkit-debug-proxy`).
+- TSS uses a flat parser (highlighting + completion). A structured grammar (selectors/blocks) and
+  TSS↔view references are a future enhancement.
+- `ti info` JSON shape varies across CLI/SDK versions — `TiInfoParser` is intentionally defensive;
+  validate device/sim/cert parsing against a real machine and tighten as needed.

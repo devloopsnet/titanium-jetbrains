@@ -36,6 +36,13 @@
                     icon="/icons/toolwindow.svg"
                     factoryClass="com.tidev.titanium.toolwindow.TiToolWindowFactory"/>
 
+        <!-- Help & Feedback (docs links + update check). -->
+        <toolWindow id="Titanium Help"
+                    anchor="left"
+                    secondary="true"
+                    icon="AllIcons.Actions.Help"
+                    factoryClass="com.tidev.titanium.toolwindow.TiHelpToolWindowFactory"/>
+
         <!-- Settings page under Tools. -->
         <applicationConfigurable parentId="tools"
                                  id="com.tidev.titanium.settings"
@@ -50,10 +57,35 @@
                   implementationClass="com.tidev.titanium.tss.TssFileType"/>
         <lang.syntaxHighlighterFactory language="TSS"
                   implementationClass="com.tidev.titanium.tss.TssSyntaxHighlighterFactory"/>
+        <lang.parserDefinition language="TSS"
+                  implementationClass="com.tidev.titanium.tss.TssParserDefinition"/>
+        <completion.contributor language="TSS"
+                  implementationClass="com.tidev.titanium.tss.TssCompletionContributor"/>
 
         <!-- Alloy XML view completion. Universal (XML support is everywhere). -->
         <completion.contributor language="XML"
             implementationClass="com.tidev.titanium.alloy.AlloyViewCompletionContributor"/>
+
+        <!-- Related-file gutter navigation (views/styles). JS controllers handled in optional file. -->
+        <codeInsight.lineMarkerProvider language="XML"
+            implementationClass="com.tidev.titanium.alloy.AlloyRelatedLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider language="TSS"
+            implementationClass="com.tidev.titanium.alloy.AlloyRelatedLineMarkerProvider"/>
+
+        <!-- Generate a missing Alloy event handler in the controller. -->
+        <intentionAction>
+            <language>XML</language>
+            <className>com.tidev.titanium.intentions.AlloyInsertHandlerIntention</className>
+            <category>Titanium</category>
+        </intentionAction>
+
+        <!-- Live templates: ti* (APIs) and al* (Alloy views). -->
+        <defaultLiveTemplates file="liveTemplates/Titanium"/>
+        <defaultLiveTemplates file="liveTemplates/Alloy"/>
+
+        <!-- Debugger: attach to the Titanium runtime over Chrome DevTools Protocol. -->
+        <programRunner implementation="com.tidev.titanium.debug.TiDebugRunner"/>
+        <xdebugger.breakpointType implementation="com.tidev.titanium.debug.TiDebugBreakpointType"/>
 
         <!-- Notifications. -->
         <notificationGroup id="Titanium" displayType="BALLOON"/>
@@ -97,6 +129,43 @@
                 <action id="Titanium.Alloy.Widget"
                         class="com.tidev.titanium.actions.alloy.AlloyGenerateWidgetAction"
                         text="Widget…"/>
+            </group>
+
+            <separator/>
+
+            <group id="Titanium.Alloy.Navigate" text="Open Related" popup="true">
+                <action id="Titanium.Alloy.OpenController"
+                        class="com.tidev.titanium.actions.alloy.OpenRelatedControllerAction"
+                        text="Controller">
+                    <keyboard-shortcut keymap="$default" first-keystroke="control alt X"/>
+                </action>
+                <action id="Titanium.Alloy.OpenView"
+                        class="com.tidev.titanium.actions.alloy.OpenRelatedViewAction"
+                        text="View">
+                    <keyboard-shortcut keymap="$default" first-keystroke="control alt V"/>
+                </action>
+                <action id="Titanium.Alloy.OpenStyle"
+                        class="com.tidev.titanium.actions.alloy.OpenRelatedStyleAction"
+                        text="Style">
+                    <keyboard-shortcut keymap="$default" first-keystroke="control alt S"/>
+                </action>
+            </group>
+
+            <separator/>
+
+            <group id="Titanium.Sdk" text="SDK" popup="true">
+                <action id="Titanium.Sdk.Install"
+                        class="com.tidev.titanium.actions.sdk.TiInstallSdkAction"
+                        text="Install SDK…"
+                        description="Install a Titanium SDK with `ti sdk install`"/>
+                <action id="Titanium.Sdk.Select"
+                        class="com.tidev.titanium.actions.sdk.TiSelectSdkAction"
+                        text="Select SDK…"
+                        description="Choose the active Titanium SDK"/>
+                <action id="Titanium.Sdk.CheckUpdates"
+                        class="com.tidev.titanium.actions.sdk.TiCheckUpdatesAction"
+                        text="Check for Updates"
+                        description="Check whether a newer Titanium SDK is available"/>
             </group>
 
             <separator/>

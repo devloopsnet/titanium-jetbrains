@@ -15,5 +15,11 @@
         <!-- Completion inside Alloy JS controllers: $.<id>, Alloy.*, Ti.* … -->
         <completion.contributor language="JavaScript"
             implementationClass="com.tidev.titanium.alloy.js.AlloyControllerCompletionContributor"/>
+
+        <!-- Related-file gutter navigation from JS controllers (view/style). The provider
+             touches no JS PSI, but registering it for the JS language only makes sense where
+             the JavaScript plugin is present. -->
+        <codeInsight.lineMarkerProvider language="JavaScript"
+            implementationClass="com.tidev.titanium.alloy.AlloyRelatedLineMarkerProvider"/>
     </extensions>
 </idea-plugin>

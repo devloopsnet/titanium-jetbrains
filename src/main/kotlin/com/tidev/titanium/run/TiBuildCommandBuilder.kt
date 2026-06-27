@@ -7,7 +7,11 @@ import com.tidev.titanium.settings.TiSettings
 /** Turns a run configuration's options into a `ti build` [GeneralCommandLine]. */
 object TiBuildCommandBuilder {
 
-    fun build(options: TiRunConfigurationOptions, projectDir: String): GeneralCommandLine {
+    fun build(
+        options: TiRunConfigurationOptions,
+        projectDir: String,
+        debugPort: Int? = null,
+    ): GeneralCommandLine {
         val args = mutableListOf("build")
 
         options.platform?.takeIf { it.isNotBlank() }?.let { args += listOf("-p", it) }
@@ -19,6 +23,9 @@ object TiBuildCommandBuilder {
 
         // LiveView: explicit flag from config, falling back to the global setting.
         if (options.liveView && TiSettings.getInstance().state.liveViewEnabled) args += "--liveview"
+
+        // Debug: expose the runtime's Chrome DevTools endpoint for the debugger to attach to.
+        debugPort?.let { args += listOf("--debug-host", "127.0.0.1:$it") }
 
         val logLevel = TiSettings.getInstance().state.logLevel
         if (logLevel.isNotBlank()) args += listOf("--log-level", logLevel)

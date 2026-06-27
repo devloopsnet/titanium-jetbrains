@@ -43,7 +43,14 @@ class TiRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
         }
     }
 
-    override fun getState(executor: Executor, environment: ExecutionEnvironment): CommandLineState {
+    override fun getState(executor: Executor, environment: ExecutionEnvironment): CommandLineState =
+        createState(environment, debugPort = null)
+
+    /** Build state that also opens the runtime debugger endpoint on [debugPort]. */
+    fun createDebugState(environment: ExecutionEnvironment, debugPort: Int): CommandLineState =
+        createState(environment, debugPort)
+
+    private fun createState(environment: ExecutionEnvironment, debugPort: Int?): CommandLineState {
         val projectDir = resolveProjectDir()
             ?: throw RuntimeConfigurationError("No Titanium project directory.")
         return object : CommandLineState(environment) {
@@ -52,7 +59,7 @@ class TiRunConfiguration(project: Project, factory: ConfigurationFactory, name: 
             }
 
             override fun startProcess(): ProcessHandler {
-                val cmd: GeneralCommandLine = TiBuildCommandBuilder.build(tiOptions, projectDir)
+                val cmd: GeneralCommandLine = TiBuildCommandBuilder.build(tiOptions, projectDir, debugPort)
                 val handler = KillableColoredProcessHandler(cmd)
                 ProcessTerminatedListener.attach(handler)
                 return handler

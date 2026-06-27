@@ -58,6 +58,18 @@ intellijPlatform {
             name = "Titanium Community"
             url = "https://titaniumsdk.com"
         }
+
+        changeNotes = provider {
+            """
+            <ul>
+              <li>Initial release: build/run/clean, environment detection, build-explorer tool window.</li>
+              <li>Project &amp; module wizards and Alloy generators (controller/view/style/model/migration/widget).</li>
+              <li>SDK &amp; update management, Help tool window.</li>
+              <li>Alloy authoring: TSS highlighting + completion, related-file navigation, handler intention, live templates.</li>
+              <li>Experimental debugger over the Chrome DevTools Protocol.</li>
+            </ul>
+            """.trimIndent()
+        }
     }
 
     // Verify the optional split actually holds: run against a Community IDE

@@ -1,0 +1,39 @@
+<templateSet group="Titanium">
+    <template name="tilog" value="Ti.API.info($MSG$);" description="Ti.API.info(...)" toReformat="true" toShortenFQNames="false">
+        <variable name="MSG" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="OTHER" value="true"/>
+        </context>
+    </template>
+    <template name="tiwarn" value="Ti.API.warn($MSG$);" description="Ti.API.warn(...)" toReformat="true" toShortenFQNames="false">
+        <variable name="MSG" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="OTHER" value="true"/>
+        </context>
+    </template>
+    <template name="tierror" value="Ti.API.error($MSG$);" description="Ti.API.error(...)" toReformat="true" toShortenFQNames="false">
+        <variable name="MSG" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="OTHER" value="true"/>
+        </context>
+    </template>
+    <template name="tialert" value="alert($MSG$);" description="alert(...)" toReformat="true" toShortenFQNames="false">
+        <variable name="MSG" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="OTHER" value="true"/>
+        </context>
+    </template>
+    <template name="tiaddevent" value="$.$EL$.addEventListener('$EVT$', function (e) {&#10;    $END$&#10;});" description="Add an event listener" toReformat="true" toShortenFQNames="false">
+        <variable name="EL" expression="" defaultValue="&quot;element&quot;" alwaysStopAt="true"/>
+        <variable name="EVT" expression="" defaultValue="&quot;click&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="OTHER" value="true"/>
+        </context>
+    </template>
+    <template name="tiopen" value="$.$WIN$.open();" description="Open a window" toReformat="true" toShortenFQNames="false">
+        <variable name="WIN" expression="" defaultValue="&quot;index&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="OTHER" value="true"/>
+        </context>
+    </template>
+</templateSet>

@@ -1,0 +1,25 @@
+<templateSet group="Alloy">
+    <template name="alview" value="&lt;Alloy&gt;&#10;    &lt;Window&gt;&#10;        $END$&#10;    &lt;/Window&gt;&#10;&lt;/Alloy&gt;" description="Alloy view skeleton" toReformat="true" toShortenFQNames="false">
+        <context>
+            <option name="XML" value="true"/>
+        </context>
+    </template>
+    <template name="allabel" value="&lt;Label&gt;$TEXT$&lt;/Label&gt;" description="Alloy Label" toReformat="true" toShortenFQNames="false">
+        <variable name="TEXT" expression="" defaultValue="&quot;Hello&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="XML" value="true"/>
+        </context>
+    </template>
+    <template name="albtn" value="&lt;Button title=&quot;$TITLE$&quot; onClick=&quot;$HANDLER$&quot; /&gt;" description="Alloy Button" toReformat="true" toShortenFQNames="false">
+        <variable name="TITLE" expression="" defaultValue="&quot;Tap&quot;" alwaysStopAt="true"/>
+        <variable name="HANDLER" expression="" defaultValue="&quot;doTap&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="XML" value="true"/>
+        </context>
+    </template>
+    <template name="alrow" value="&lt;TableViewRow&gt;&#10;    $END$&#10;&lt;/TableViewRow&gt;" description="Alloy TableViewRow" toReformat="true" toShortenFQNames="false">
+        <context>
+            <option name="XML" value="true"/>
+        </context>
+    </template>
+</templateSet>
