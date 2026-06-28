@@ -56,10 +56,8 @@ class TiEnvironmentService(private val project: Project) {
                         return
                     }
                     indicator.checkCanceled()
-                    val json = TiCli.runJson(
-                        listOf("info", "--types", "titanium,ios,android"),
-                        timeoutMs = 120_000,
-                    )
+                    // v8 CLI: plain `ti info --output json` (no --types/--no-* flags).
+                    val json = TiCli.runJson(listOf("info"), timeoutMs = 120_000)
                     environment = TiInfoParser.parse(json, version)
                     lastError = null
                     LOG.info("Titanium env: ${environment.sdks.size} SDK(s), ${environment.devices.size} device(s)")

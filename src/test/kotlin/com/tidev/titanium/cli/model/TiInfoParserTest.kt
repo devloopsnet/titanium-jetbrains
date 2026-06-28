@@ -5,34 +5,35 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Pure unit test for the `ti info --output json` parser (no IDE fixture required). */
+/** Pure unit test for the `ti info --output json` parser, against the real CLI v8 shape. */
 class TiInfoParserTest {
 
     @Test
     fun parsesSdksDevicesCertsAndProfiles() {
-        val env = TiInfoParser.parse(JsonParser.parseString(SAMPLE), "5.4.0")
+        val env = TiInfoParser.parse(JsonParser.parseString(SAMPLE))
 
-        assertEquals("5.4.0", env.cliVersion)
+        assertEquals("8.1.5", env.cliVersion)
 
-        // SDKs
-        assertEquals(1, env.sdks.size)
-        assertEquals("12.4.0.GA", env.selectedSdk?.version)
+        // SDKs — map keyed by full id; selection comes from ios.tisdk / android.tisdk.
+        assertEquals(2, env.sdks.size)
+        assertEquals("13.2.0.GA", env.selectedSdk?.version)
         assertTrue(env.selectedSdk?.selected == true)
 
-        // Devices: 1 iOS sim + 1 iOS device + 1 Android AVD + 1 Android device
-        assertEquals(4, env.devices.size)
-        assertTrue(env.devices.any { it.name == "iPhone 15" && it.platform == TiPlatform.IOS && it.target == TiTarget.IOS_SIMULATOR })
+        // Devices: 1 iOS sim + 1 iOS device + 1 Android emulator.
+        assertEquals(3, env.devices.size)
+        assertTrue(env.devices.any { it.name == "iPhone 15" && it.target == TiTarget.IOS_SIMULATOR })
         assertTrue(env.devices.any { it.name == "My iPhone" && it.target == TiTarget.IOS_DEVICE })
-        assertTrue(env.devices.any { it.name == "Pixel_7" && it.platform == TiPlatform.ANDROID && it.target == TiTarget.ANDROID_EMULATOR })
-        assertTrue(env.devices.any { it.platform == TiPlatform.ANDROID && it.target == TiTarget.ANDROID_DEVICE })
+        assertTrue(env.devices.any { it.name == "Pixel 8 API 34" && it.target == TiTarget.ANDROID_EMULATOR })
 
-        // Signing
-        assertEquals(1, env.iosCertificates.size)
+        // Certs come from certs.keychains.<keychain>.{developer,distribution}.
+        assertEquals(2, env.iosCertificates.size)
+
+        // Provisioning across development/distribution/adhoc/enterprise.
         assertEquals(1, env.iosProfiles.size)
         assertEquals("UUID1", env.iosProfiles.first().uuid)
 
-        // Issues
-        assertEquals(listOf("Something needs attention"), env.issues)
+        // Issues aggregated from ios.issues + android.issues.
+        assertEquals(listOf("API too new"), env.issues)
     }
 
     @Test
@@ -45,21 +46,31 @@ class TiInfoParserTest {
     private companion object {
         val SAMPLE = """
         {
-          "titaniumCLI": { "version": "5.4.0" },
+          "titaniumCLI": { "version": "8.1.5" },
           "titanium": {
-            "12.4.0.GA": { "version": "12.4.0.GA", "path": "/sdks/12.4.0.GA", "selected": true }
+            "13.2.0.GA": { "version": "13.2.0", "path": "/sdks/13.2.0.GA" },
+            "12.8.0.GA": { "version": "12.8.0", "path": "/sdks/12.8.0.GA" }
           },
           "ios": {
-            "simulators": { "ios": { "17.0": [ { "name": "iPhone 15", "udid": "ABC", "version": "17.0" } ] } },
-            "devices": [ { "name": "My iPhone", "udid": "DEV1" } ],
-            "certs": { "distribution": [ { "name": "iPhone Distribution: Acme", "invalid": false } ] },
-            "provisioning": { "distribution": [ { "uuid": "UUID1", "name": "Acme Dist", "appId": "com.acme" } ] }
+            "tisdk": "13.2.0.GA",
+            "simulators": { "ios": { "26.5": [ { "udid": "ABC", "name": "iPhone 15", "version": "26.5" } ] } },
+            "devices": [ { "udid": "DEV1", "name": "My iPhone" } ],
+            "certs": { "keychains": { "/login.keychain": {
+              "developer": [ { "name": "Dev: Acme", "invalid": false } ],
+              "distribution": [ { "name": "Dist: Acme", "invalid": false } ]
+            } } },
+            "provisioning": {
+              "development": [ { "uuid": "UUID1", "name": "Dev Profile", "appPrefix": "ABCDE", "expired": false } ],
+              "distribution": [], "adhoc": [], "enterprise": []
+            },
+            "issues": []
           },
           "android": {
-            "avds": [ { "name": "Pixel_7", "target": "android-34" } ],
-            "devices": [ { "id": "emulator-5554", "model": "Pixel", "release": "14" } ]
-          },
-          "issues": [ "Something needs attention" ]
+            "tisdk": "13.2.0.GA",
+            "emulators": [ { "id": "Pixel_8_API_34", "name": "Pixel 8 API 34", "target": "Android 14" } ],
+            "devices": [],
+            "issues": [ { "id": "x", "type": "warning", "message": "API too new" } ]
+          }
         }
         """.trimIndent()
     }

@@ -8,41 +8,31 @@ import com.tidev.titanium.settings.TiSettings
 import java.io.File
 
 /**
- * Thin wrapper around the Titanium CLI (`ti`). Builds non-interactive command lines and
- * runs them as child processes. Stateless: every call reads the current [TiSettings].
+ * Thin wrapper around the Titanium CLI (`ti`). Stateless: every call reads the current
+ * [TiSettings].
  *
- * Two usage styles:
- *  - [run] / [runJson] for short state/enumeration commands (synchronous, captured).
- *  - [commandLine] to hand a prepared [GeneralCommandLine] to a run-configuration console
- *    for streamed build output.
+ * The modern (v8) CLI rejects unknown global flags, so we keep invocations minimal: bare
+ * `ti -v`, `ti info --output json`, and `ti build <options>` run in the project directory
+ * (no `--project-dir`/`--no-*` flags, which v8 doesn't accept).
  */
 object TiCli {
     private val LOG = logger<TiCli>()
 
-    /** Flags that make the CLI safe to drive from a GUI: never prompt, clean output. */
-    private val NON_INTERACTIVE = listOf("--no-prompt", "--no-banner", "--no-colors", "--no-progress-bars")
-
     private fun settings() = TiSettings.getInstance().state
 
     /**
-     * Build a [GeneralCommandLine] for an arbitrary `ti` invocation. [projectDir] sets both the
-     * working directory and `--project-dir` so the CLI works regardless of cwd.
+     * Build a [GeneralCommandLine] for an arbitrary `ti` invocation. [projectDir] sets the working
+     * directory so the CLI operates on the right project (we use cwd rather than a `--project-dir`
+     * flag for cross-version compatibility).
      */
-    fun commandLine(
-        args: List<String>,
-        projectDir: String? = null,
-        nonInteractive: Boolean = true,
-    ): GeneralCommandLine {
+    fun commandLine(args: List<String>, projectDir: String? = null): GeneralCommandLine {
         val s = settings()
         val exe = s.cliPath.ifBlank { "ti" }
         val cmd = GeneralCommandLine(exe)
         cmd.addParameters(args)
-        if (nonInteractive) cmd.addParameters(NON_INTERACTIVE)
-        projectDir?.let {
-            cmd.addParameters("--project-dir", it)
-            cmd.withWorkDirectory(File(it))
-        }
-        // Inherit PATH etc. so a node-installed `ti` resolves; honor an explicit node dir.
+        projectDir?.let { cmd.withWorkDirectory(File(it)) }
+        // Inherit the user's shell PATH so a node-installed `ti` resolves even when the IDE was
+        // launched from the Dock with a stripped PATH; honor an explicit node dir too.
         cmd.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
         if (s.nodePath.isNotBlank()) {
             val existing = System.getenv("PATH").orEmpty()
@@ -89,10 +79,7 @@ object TiCli {
 
     fun isAvailable(): Boolean = version() != null
 
-    /**
-     * Some CLI builds still emit a stray line before the JSON payload even with --no-banner.
-     * Trim anything before the first '{' or '['.
-     */
+    /** Trim anything before the first '{' or '[' in case the CLI prefixes a stray line. */
     private fun extractJson(text: String): String {
         val brace = text.indexOf('{')
         val bracket = text.indexOf('[')
