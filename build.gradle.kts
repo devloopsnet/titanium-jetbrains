@@ -17,6 +17,9 @@ repositories {
 }
 
 dependencies {
+    // JUnit 4 for the pure unit tests (the platform test framework doesn't bring it in).
+    testImplementation("junit:junit:4.13.2")
+
     intellijPlatform {
         // --- Compile base -------------------------------------------------------
         // Compile against IDEA Ultimate because it BUNDLES the JavaScript plugin.

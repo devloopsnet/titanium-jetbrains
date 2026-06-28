@@ -21,6 +21,7 @@ data class CdpFrame(
     val lineNumber: Int,
     val columnNumber: Int,
     val scopeObjectIds: List<String> = emptyList(),
+    val callFrameId: String = "",
 )
 
 /** A `Debugger.paused` event. */
@@ -139,6 +140,25 @@ class CdpClient(private val host: String, private val port: Int) {
         }
     }
 
+    /** Evaluate [expression] in the context of [callFrameId] and deliver the result. */
+    fun evaluateOnCallFrame(callFrameId: String, expression: String, onResult: (CdpProperty?) -> Unit) {
+        send(
+            "Debugger.evaluateOnCallFrame",
+            mapOf("callFrameId" to callFrameId, "expression" to expression, "returnByValue" to false, "silent" to true),
+        ) { result ->
+            val r = result.getAsJsonObject("result")
+            if (r == null) {
+                onResult(null)
+            } else {
+                val desc = r.get("description")?.asString
+                    ?: r.get("value")?.asString
+                    ?: r.get("type")?.asString
+                    ?: "undefined"
+                onResult(CdpProperty(expression, desc, r.get("objectId")?.asString))
+            }
+        }
+    }
+
     fun resume() = send("Debugger.resume")
     fun stepOver() = send("Debugger.stepOver")
     fun stepInto() = send("Debugger.stepInto")
@@ -193,6 +213,7 @@ class CdpClient(private val host: String, private val port: Int) {
                 lineNumber = location?.get("lineNumber")?.asInt ?: 0,
                 columnNumber = location?.get("columnNumber")?.asInt ?: 0,
                 scopeObjectIds = scopeIds,
+                callFrameId = f.get("callFrameId")?.asString.orEmpty(),
             )
         }
         return CdpPaused(reason, frames)

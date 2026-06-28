@@ -12,6 +12,7 @@ import com.intellij.xdebugger.XExpression
 import com.intellij.xdebugger.XSourcePosition
 import com.intellij.xdebugger.evaluation.EvaluationMode
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
+import com.intellij.xdebugger.evaluation.XDebuggerEvaluator
 import com.intellij.xdebugger.frame.XCompositeNode
 import com.intellij.xdebugger.frame.XExecutionStack
 import com.intellij.xdebugger.frame.XNamedValue
@@ -28,9 +29,12 @@ class TiStackFrame(
     private val title: String,
     private val cdp: CdpClient,
     private val scopeObjectIds: List<String>,
+    private val callFrameId: String = "",
 ) : XStackFrame() {
 
     override fun getSourcePosition(): XSourcePosition? = position
+
+    override fun getEvaluator(): XDebuggerEvaluator = TiEvaluator(cdp, callFrameId)
 
     override fun customizePresentation(component: ColoredTextContainer) {
         component.append(title, SimpleTextAttributes.REGULAR_ATTRIBUTES)
@@ -72,6 +76,24 @@ class TiValue(
             val list = XValueChildrenList()
             props.forEach { list.add(TiValue(it.name, it.value, it.objectId, cdp)) }
             node.addChildren(list, true)
+        }
+    }
+}
+
+/** Evaluates watch/console expressions in the paused frame via CDP. */
+class TiEvaluator(private val cdp: CdpClient, private val callFrameId: String) : XDebuggerEvaluator() {
+    override fun evaluate(
+        expression: String,
+        callback: XEvaluationCallback,
+        expressionPosition: XSourcePosition?,
+    ) {
+        if (callFrameId.isBlank()) {
+            callback.errorOccurred("No active stack frame")
+            return
+        }
+        cdp.evaluateOnCallFrame(callFrameId, expression) { prop ->
+            if (prop == null) callback.errorOccurred("Could not evaluate '$expression'")
+            else callback.evaluated(TiValue(expression, prop.value, prop.objectId, cdp))
         }
     }
 }

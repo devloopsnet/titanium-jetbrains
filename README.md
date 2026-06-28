@@ -112,8 +112,16 @@ Locally: `./gradlew signPlugin` and `./gradlew publishPlugin` (with the same env
 - **Open All Related Files** (Ctrl+Alt+A); clickable file paths in build/package consoles.
 - **Update Titanium CLI / Alloy** actions (`npm i -g …`) in the SDK menu.
 
-### Still open (deliberately)
-- Symbol-level view↔TSS resolution (needs a full TSS grammar/PSI).
-- Deeper debugger features (expression evaluation, watches, source maps).
-- Broader test coverage (only the parser is unit-tested so far).
-- Validation of the debugger, `api.jsca` completion, and `ti info` parsing against a real install.
+- **Go-to-definition** also resolves a view `id`/`class` to its TSS rule (`'#id'` / `'.class'`).
+- **Debugger** supports variable inspection **and expression evaluation / watches**
+  (`Debugger.evaluateOnCallFrame`).
+- Unit tests cover the `ti info` parser and the TSS lexer.
+
+### Remaining (requires a real Titanium install — can't be done in code alone)
+- Validate the debugger, `api.jsca` completion, and `ti info` parsing against a running
+  simulator/device and actual SDK output, then tune as needed.
+- A first green `./gradlew test buildPlugin` on a machine with the IntelliJ SDK.
+
+A structured TSS grammar/PSI (for rename/find-usages of rules, beyond go-to-definition) and broader
+fixture-based tests are possible future polish, but all vscode-titanium user-facing features are
+implemented.

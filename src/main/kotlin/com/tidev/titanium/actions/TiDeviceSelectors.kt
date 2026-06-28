@@ -34,6 +34,7 @@ class TiPlatformComboAction : ComboBoxAction(), DumbAware {
         }
     }
 
+    @Suppress("OverridingDeprecatedMember", "DEPRECATION")
     override fun createPopupActionGroup(button: JComponent): DefaultActionGroup {
         val project = projectFrom(button) ?: return DefaultActionGroup()
         val group = DefaultActionGroup()
@@ -68,6 +69,7 @@ class TiDeviceComboAction : ComboBoxAction(), DumbAware {
         }
     }
 
+    @Suppress("OverridingDeprecatedMember", "DEPRECATION")
     override fun createPopupActionGroup(button: JComponent): DefaultActionGroup {
         val project = projectFrom(button) ?: return DefaultActionGroup()
         val selection = TiRunSelection.getInstance(project)

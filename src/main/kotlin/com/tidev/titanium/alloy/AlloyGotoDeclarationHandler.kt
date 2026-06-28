@@ -33,6 +33,15 @@ class AlloyGotoDeclarationHandler : GotoDeclarationHandler {
             controllerTarget(element, vfile, value)?.let { return arrayOf(it) }
         }
 
+        // id / class -> TSS rule.
+        when (attr.name) {
+            "id" -> tssRuleTarget(element, vfile, "#$value")?.let { return arrayOf(it) }
+            "class" -> {
+                val cls = value.split(Regex("\\s+")).firstOrNull { it.isNotBlank() }
+                if (cls != null) tssRuleTarget(element, vfile, ".$cls")?.let { return arrayOf(it) }
+            }
+        }
+
         // i18n key -> strings.xml entry.
         val key = if (attr.name == "textid") value
         else Regex("""L\(\s*['"]([^'"]+)['"]""").find(value)?.groupValues?.get(1)
@@ -40,6 +49,14 @@ class AlloyGotoDeclarationHandler : GotoDeclarationHandler {
             i18nTarget(element, vfile, key)?.let { return arrayOf(it) }
         }
         return null
+    }
+
+    private fun tssRuleTarget(element: PsiElement, vfile: com.intellij.openapi.vfs.VirtualFile, selector: String): PsiElement? {
+        val style = AlloyRelated.related(vfile, AlloyKind.STYLE) ?: return null
+        val psi = PsiManager.getInstance(element.project).findFile(style) ?: return null
+        // Match the selector as a quoted TSS key: '#id' or '.class'.
+        val idx = Regex("""['"]${Regex.escape(selector)}['"]""").find(psi.text)?.range?.first ?: return null
+        return psi.findElementAt(idx)
     }
 
     private fun controllerTarget(element: PsiElement, vfile: com.intellij.openapi.vfs.VirtualFile, handler: String): PsiElement? {
